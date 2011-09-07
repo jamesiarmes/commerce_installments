@@ -50,7 +50,7 @@ function commerce_installments_views_default_views() {
   $views = array();
 
   $view = new view;
-  $view->name = 'commerce_installmentss';
+  $view->name = 'commerce_installments';
   $view->description = 'A list of all commerce installments';
   $view->tag = 'Commerce Installments';
   $view->base_table = 'commerce_installments';
@@ -183,7 +183,7 @@ function commerce_installments_views_default_views() {
   $handler->display->display_options['menu']['type'] = 'default tab';
   $handler->display->display_options['menu']['title'] = 'List';
   $handler->display->display_options['menu']['weight'] = '-10';
-  $handler->display->display_options['tab_options']['type'] = 'tab';
+  $handler->display->display_options['tab_options']['type'] = 'normal';
   $handler->display->display_options['tab_options']['title'] = 'Commerce installments';
   $handler->display->display_options['tab_options']['description'] = 'Manage commerce installments';
   $handler->display->display_options['tab_options']['weight'] = '0';
