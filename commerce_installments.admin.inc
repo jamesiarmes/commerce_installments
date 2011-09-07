@@ -13,13 +13,11 @@
  * UI controller.
  */
 class CommerceInstallmentsUIController extends EntityDefaultUIController {
-
   /**
    * Overrides hook_menu() defaults. Main reason for doing this is that
    * parent class hook_menu() is optimized for entity type administration.
    */
   public function hook_menu() {
-    
     $items = array();
     $id_count = count(explode('/', $this->path));
     $wildcard = isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%' . $this->entityType;
@@ -32,10 +30,10 @@ class CommerceInstallmentsUIController extends EntityDefaultUIController {
       'file path' => drupal_get_path('module', 'system'),
       'file' => 'system.admin.inc',
     );
-    
+
     // Change the overview menu type for the list of commerce installments.
     $items[$this->path]['type'] = MENU_LOCAL_TASK;
-    
+
     // Change the add page menu to multiple types of entities
     $items[$this->path . '/add'] = array(
       'title' => 'Add a commerce installments',
@@ -47,9 +45,8 @@ class CommerceInstallmentsUIController extends EntityDefaultUIController {
       'weight' => 20,
       'file' => 'commerce_installments.admin.inc',
       'file path' => drupal_get_path('module', $this->entityInfo['module'])
-
     );
-    
+
     // Add menu items to add each different type of entity.
     foreach (commerce_installments_get_types() as $type) {
       $items[$this->path . '/add/' . $type->type] = array(
@@ -74,13 +71,14 @@ class CommerceInstallmentsUIController extends EntityDefaultUIController {
       'file' => 'commerce_installments.admin.inc',
       'file path' => drupal_get_path('module', $this->entityInfo['module'])
     );
+
     $items[$this->path . '/commerce_installment/' . $wildcard . '/edit'] = array(
       'title' => 'Edit',
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -10,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     );
-    
+
     $items[$this->path . '/commerce_installment/' . $wildcard . '/delete'] = array(
       'title' => 'Delete',
       'page callback' => 'commerce_installments_delete_form_wrapper',
@@ -93,7 +91,7 @@ class CommerceInstallmentsUIController extends EntityDefaultUIController {
       'file' => 'commerce_installments.admin.inc',
       'file path' => drupal_get_path('module', $this->entityInfo['module'])
     );
-    
+
     // Menu item for viewing commerce installments
     $items['commerce_installment/' . $wildcard] = array(
       //'title' => 'Title',

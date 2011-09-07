@@ -42,7 +42,7 @@ function commerce_installments_entity_info() {
       'path' => 'admin/commerce/commerce_installments',
       'file' => 'commerce_installments.admin.inc',
       'controller class' => 'CommerceInstallmentsUIController',
-      'menu wildcard' => '%commerce-installment',
+      'menu wildcard' => '%commerce_installments',
     ),
   );
   // The entity that holds information about the entity types	  
@@ -66,6 +66,7 @@ function commerce_installments_entity_info() {
       'path' => 'admin/commerce/commerce_installments/commerce_installment_types',
       'file' => 'commerce_installments_type.admin.inc',
       'controller class' => 'CommerceInstallmentsTypeUIController',
+      'menu wildcard' => '%commerce_installments_type',
     ),
   );
 
