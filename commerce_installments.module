@@ -399,7 +399,7 @@ class CommerceInstallments extends Entity {
   }
 
   protected function defaultLabel() {
-    return $this->name;
+    return $this->commerce_installments_id;
   }
 
   protected function defaultUri() {
