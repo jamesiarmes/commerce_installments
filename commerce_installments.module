@@ -1,0 +1,507 @@
+<?php
+
+/**
+ * @file
+ * Module for Commerce Installments. Written by Commerce Guys, sponsored by All players.
+ */  
+
+/**
+ * Implement hook_entity_info().
+ *
+ * We define two entities here - the actual entity that will hold our installment
+ * specific information and an entity that holds information about the different
+ * types of installments.
+ */
+function commerce_installments_entity_info() {
+
+  // The installment data entity. Includes the total amount due, and the due date,
+  // and other meta data.
+  $return['commerce_installments'] = array(
+    'label' => t('Commerce Installment'),
+    'entity class' => 'CommerceInstallments',
+    'controller class' => 'CommerceInstallmentsController',
+    'base table' => 'commerce_installments',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+        'id' => 'commerce_installments_id',
+        'bundle' => 'type',
+    ),
+    // Bundles are defined by the commerce installments types below
+    'bundles' => array(),
+    // Bundle keys tell the FieldAPI how to extract information from the bundle objects
+    'bundle keys' => array(
+      'bundle' => 'type',
+    ),
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'creation callback' => 'commerce_installments_create',
+    'access callback' => 'commerce_installments_access',
+    'module' => 'commerce_installments',
+    // The information below is used by the CommerceInstallmentsUIController (which extends the EntityDefaultUIController)
+    'admin ui' => array(
+      'path' => 'admin/commerce/commerce_installments',
+      'file' => 'commerce_installments.admin.inc',
+      'controller class' => 'CommerceInstallmentsUIController',
+      'menu wildcard' => '%commerce-installment',
+    ),
+  );
+  // The entity that holds information about the entity types	  
+  $return['commerce_installments_type'] = array(
+    'label' => t('Commerce Installment Type'),
+    'entity class' => 'CommerceInstallmentsType',
+    'controller class' => 'CommerceInstallmentsTypeController',
+    'base table' => 'commerce_installments_type',
+    'fieldable' => FALSE,
+    'bundle of' => 'commerce_installments',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'name' => 'type',
+      'label' => 'label',
+    ),
+    'access callback' => 'commerce_installments_type_access',
+    'module' => 'commerce_installments',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => 'admin/commerce/commerce_installments/commerce_installment_types',
+      'file' => 'commerce_installments_type.admin.inc',
+      'controller class' => 'CommerceInstallmentsTypeUIController',
+    ),
+  );
+
+  return $return;
+}
+
+
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * We are adding the info about the commerce installments types via a hook to avoid a recursion
+ * issue as loading the commerce installments types requires the entity info as well.
+ *
+ * @todo This needs to be improved
+ */
+function commerce_installments_entity_info_alter(&$entity_info) {
+  foreach (commerce_installments_get_types() as $type => $info) {
+    $entity_info['commerce_installments']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/commerce/commerce_installments/commerce_installment_types/manage/%commerce-installment_type',
+        'real path' => 'admin/commerce/commerce_installments/commerce_installment_types/manage/' . $type,
+        'bundle argument' => 4,
+        'access arguments' => array('administer commerce installment types'),
+      ),
+    );
+  }
+}
+  
+
+/**
+ * Implements hook_permission().
+ */
+function commerce_installments_permission() {
+  // We set up permisssions to manage entity types, manage all entities and the
+  // permissions for each individual entity
+  $permissions = array(
+    'administer commerce installments types' => array(
+      'title' => t('Administer commerce installments types'),
+      'description' => t('Create and delete fields for commerce installments types, and set their permissions.'),
+    ),
+    'administer commerce installments' => array(
+      'title' => t('Administer commerce installments'),
+      'description' => t('Edit and delete all commerce installments'),
+    ),  
+  );
+  
+  //Generate permissions per commerce installments 
+  foreach (commerce_installments_get_types() as $type) {
+    $type_name = check_plain($type->type);
+    $permissions += array(
+      "edit any $type_name commerce installment" => array(
+        'title' => t('%type_name: Edit any commerce installments', array('%type_name' => $type->label)),
+      ),
+      "view any $type_name commerce installment" => array(
+        'title' => t('%type_name: View any commerce installments', array('%type_name' => $type->label)),
+      ),
+    );
+  }
+  return $permissions;  
+}
+
+
+/**
+ * Determines whether the given user has access to a commerce installments.
+ *
+ * @param $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param $installment
+ *   Optionally a commerce installments or a commerce installments type to check access for. If nothing is
+ *   given, access for all commerce installments is determined.
+ * @param $account
+ *   The user to check for. Leave it to NULL to check for the global user.
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function commerce_installments_access($op, $installment = NULL, $account = NULL) {
+  if (user_access('administer commerce installments', $account)) {
+    return TRUE;
+  }
+  if (isset($installment) && $type_name = $installment->type) {
+    $op = ($op == 'view') ? 'view' : 'edit';
+    if (user_access("$op any $type_name commerce installment", $account)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+
+/**
+ * Access callback for the entity API.
+ */
+function commerce_installments_type_access($op, $type = NULL, $account = NULL) {
+  return user_access('administer commerce installment types', $account);
+}
+
+
+/**
+ * Gets an array of all commerce installments types, keyed by the type name.
+ *
+ * @param $type_name
+ *   If set, the type with the given name is returned.
+ * @return CommerceInstallmentsType[]
+ *   Depending whether $type isset, an array of commerce installments types or a single one.
+ */
+function commerce_installments_get_types($type_name = NULL) {
+  // entity_load will get the Entity controller for our commerce installments entity and call the load
+  // function of that object - we are loading entities by name here.
+  $types = entity_load_multiple_by_name('commerce_installments_type', isset($type_name) ? array($type_name) : FALSE);
+  return isset($type_name) ? reset($types) : $types;
+}
+
+
+/**
+ * Menu argument loader; Load a commerce installments type by string.
+ *
+ * @param $type
+ *   The machine-readable name of a commerce installments type to load.
+ * @return
+ *   A commerce installments type array or FALSE if $type does not exist.
+ */
+function commerce_installments_type_load($type) {
+  return commerce_installments_get_types($type);
+}
+
+
+/**
+ * Fetch a commerce installments object. Make sure that the wildcard you choose 
+ * in the commerce installments entity definition fits the function name here.
+ *
+ * @param $commerce_installments_id
+ *   Integer specifying the commerce installments id.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
+ * @return
+ *   A fully-loaded $installment object or FALSE if it cannot be loaded.
+ *
+ * @see commerce_installments_load_multiple()
+ */
+function commerce_installments_load($installment_id, $reset = FALSE) {
+  $installments = commerce_installments_load_multiple(array($installment_id), array(), $reset);
+  return reset($installments);
+}
+
+
+/**
+ * Load multiple commerce installments based on certain conditions.
+ *
+ * @param $installment_ids
+ *   An array of commerce installments IDs.
+ * @param $conditions
+ *   An array of conditions to match against the {commerce_installments} table.
+ * @param $reset
+ *   A boolean indicating that the internal cache should be reset.
+ * @return
+ *   An array of commerce installments objects, indexed by commerce_installments_id.
+ *
+ * @see entity_load()
+ * @see commerce_installments_load()
+ */
+function commerce_installments_load_multiple($installment_ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('commerce_installments', $installment_ids, $conditions, $reset);
+}
+
+
+/**
+ * Deletes a commerce installments.
+ * 
+ * @param $installment
+ *   The commerce installments object.
+ */
+function commerce_installments_delete(CommerceInstallments $installment) {
+  $installment->delete();
+}
+
+
+/**
+ * Delete multiple commerce installments.
+ *
+ * @param $installment_ids
+ *   An array of commerce installments IDs.
+ */
+function commerce_installments_delete_multiple(array $installment_ids) {
+  entity_get_controller('commerce_installments')->delete($installment_ids);
+}
+
+
+/**
+ * Create a commerce installments object.
+ * 
+ * @param $installment_ids
+ *   An array of values to be saved.
+ */
+function commerce_installments_create($values = array()) {
+  return entity_get_controller('commerce_installments')->create($values);
+}
+
+
+/**
+ * Saves a commerce installments to the database.
+ *
+ * @param $installment
+ *   The commerce installments object.
+ */
+function commerce_installments_save(CommerceInstallments $installment) {
+  return $installment->save();
+}
+
+
+/**
+ * Saves a commerce installments type to the db.
+ *
+ * @param $type
+ *   The commerce installments type object.
+ */
+function commerce_installments_type_save(CommerceInstallmentsType $type) {
+  $type->save();
+}
+
+
+/**
+ * Deletes a commerce installments type from the db.
+ *
+ * @param $type
+ *   The commerce installments type object.
+ */
+function commerce_installments_type_delete(CommerceInstallmentsType $type) {
+  $type->delete();
+}
+
+
+/**
+ * URI callback for commerce installments.
+ *
+ * @param $installment
+ *   The commerce installments object.
+ */
+function commerce_installments_uri(CommerceInstallments $installment){
+  return array(
+    'path' => 'commerce_installment/' . $installment->commerce_installments_id,
+  );
+}
+
+
+/**
+ * Menu title callback for showing individual entities
+ *
+ * @param $installment
+ *   The commerce installments object.
+ */
+function commerce_installments_page_title(CommerceInstallments $installment){
+  return $installment->name;
+}
+
+
+/**
+ * Sets up content to show an individual commerce installments
+ *
+ * @param $installment
+ *   The commerce installment object
+ */
+function commerce_installments_page_view(CommerceInstallments $installment, $view_mode = 'full') {
+  // @todo: figure out how installments themselves should look.
+  $controller = entity_get_controller('commerce_installments');  
+  $content = $controller->view(array($installment->commerce_installments_id => $installment));
+  return $content;
+}
+
+
+/**
+ * Implements hook_views_api().
+ */
+function commerce_installments_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'commerce_installments') . '/views',
+  );
+}
+
+
+/**
+ * Implement hook_theme().
+ */
+function commerce_installments_theme() {
+  return array(
+    'commerce_installments_add_list' => array(
+      'variables' => array('content' => array()),
+      'file' => 'commerce_installments.admin.inc',
+    ),
+    'commerce_installments' => array(
+      'render element' => 'elements',
+      'template' => 'commerce-installments',
+    ),
+   'commerce_installments_sample_data' => array(
+      'variables' => array('commerce_installments_sample_data', 'commerce_installments' => NULL),
+      'template' => 'commerce-installments-sample-data',
+    ),
+
+
+  );
+}  
+
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function commerce_installments_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link 'admin/commerce/commerce_installmenst/add' on 'admin/commerce/commerce_installments'.
+  if ($root_path == 'admin/commerce/commerce_installments') {
+    $item = menu_get_item('admin/commerce/commerce_installments/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+
+/**
+ * The class used for commerce installments entities
+ */
+class CommerceInstallments extends Entity {
+  
+  public function __construct($values = array()) {
+    parent::__construct($values, 'commerce_installments');
+  }
+
+  protected function defaultLabel() {
+    return $this->name;
+  }
+
+  protected function defaultUri() {
+    //@todo: Do we need a display URL for users to view their installments?
+    return array('path' => 'commerce_installments/' . $this->commerce_installments_id);
+  }
+}
+
+/**
+ * The class used for commerce installments type entities
+ */
+class CommerceInstallmentsType extends Entity {
+  
+  public $type;
+  public $label;
+  
+  public function __construct($values = array()) {
+    parent::__construct($values, 'commerce_installments_type');
+  }
+  
+}
+
+
+/**
+ * The Controller for Commerce Installment entities
+ */
+class CommerceInstallmentsController extends EntityAPIController {
+  public function __construct($entityType) {
+    parent::__construct($entityType);
+  }
+
+
+  /**
+   * Create a commerce installments - we first set up the values that are specific
+   * to our commerce installments schema but then also go through the EntityAPIController
+   * function.
+   * 
+   * @param $type
+   *   The machine-readable type of the commerce installments.
+   *
+   * @return
+   *   A commerce installments object with all default fields initialized.
+   */
+  public function create(array $values = array()) {
+    // Add values that are specific to our Commerce Installment
+    $values += array( 
+      'commerce_installments_id' => '',
+      'is_new' => TRUE,
+      //@todo: Do we need titles for installments? If so, what should it be.
+      'title' => '',
+      'created' => '',
+      'changed' => '',
+      'data' => '',
+    );
+    
+    $installment = parent::create($values);
+    return $installment;
+  }
+  
+  /**
+   * Overriding the buildContent function to add entity specific fields
+   */
+  public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
+    $content = parent::buildContent($entity, $view_mode, $langcode, $content);
+
+    //@todo: Replace the sample data with actual data.
+    $content['commerce_installments_sample_data'] =  array(
+      '#markup' => theme('commerce_installments_sample_data', array('commerce_installments_sample_data' => check_plain($entity->data['sample_data']), 'commerce_installments' => $entity)),
+    );
+
+    return $content;
+  }
+  
+}
+
+/**
+ * The Controller for Commerce Installment entities
+ */
+class CommerceInstallmentsTypeController extends EntityAPIControllerExportable {
+  public function __construct($entityType) {
+    parent::__construct($entityType);
+  }
+  
+   /**
+   * Create a commerce installments type - we first set up the values that are specific
+   * to our commerce installments type schema but then also go through the EntityAPIController
+   * function.
+   * 
+   * @param $type
+   *   The machine-readable type of the commerce installments.
+   *
+   * @return
+   *   A commerce installments type object with all default fields initialized.
+   */
+  public function create(array $values = array()) {
+    // Add values that are specific to our Commerce Installment
+    $values += array( 
+      'id' => '',
+      'is_new' => TRUE,
+      'data' => '',
+    );
+    $installment_type = parent::create($values);
+    return $installment_type;
+  }
+
+}
