@@ -155,6 +155,7 @@ function commerce_installments_views_default_views() {
   $handler->display->display_options['fields']['initial_order_ref']['empty_zero'] = 0;
   $handler->display->display_options['fields']['initial_order_ref']['hide_alter_empty'] = 0;
   /* Field: Commerce Installment: Uid */
+  //@todo: Convert to display the username, rather than the UID
   $handler->display->display_options['fields']['uid']['id'] = 'uid';
   $handler->display->display_options['fields']['uid']['table'] = 'commerce_installments';
   $handler->display->display_options['fields']['uid']['field'] = 'uid';
