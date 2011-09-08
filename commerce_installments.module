@@ -657,7 +657,7 @@ function commerce_installments_date_transform($timestamp){
     'month' => (int) date("m", $timestamp),
     'day' => (int) date("d", $timestamp),
   );
-  dpm($date_array);
+
   return $date_array;
 }
 
@@ -676,6 +676,7 @@ function commerce_installments_field_widget_form(&$form, &$form_state, $field, $
 
   switch ($instance['widget']['type']) {
     case 'commerce_installments_payment':
+
       $widget['due_date'] = array(
         '#type' => 'date',
         '#title' => t('Payment due date'),
@@ -686,7 +687,7 @@ function commerce_installments_field_widget_form(&$form, &$form_state, $field, $
         '#type' => 'textfield',
         '#title' => t('Amount Due'),
         '#size' => 6,
-        '#default_value' => '10.00',
+        '#default_value' => number_format(($items[$delta]['amount']/100), 2),
         '#description' => t('The amount due'),
       );
     break;

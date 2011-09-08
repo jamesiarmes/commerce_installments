@@ -167,13 +167,19 @@ function commerce_installments_edit_form($form, &$form_state, $installment) {
   // Add the default field elements.
   $form['due_date'] = array(
     '#type' => 'date',
-    '#title' => t('Installment due date'),
-    '#default_value' => isset($installment->name) ? $installment->name : '',
-    '#maxlength' => 255,
-    '#required' => TRUE,
-    '#weight' => -5,
+    '#title' => t('Payment due date'),
+    '#default_value' => isset($installment->due_date) ? commerce_installments_date_transform($installment->due_date) : commerce_installments_date_transform(strtotime('NOW')),
+    '#description' => t('The due date for the installment payment.'),
   );
-  
+
+  $form['total_amount_due'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Amount Due'),
+    '#size' => 6,
+    '#default_value' => number_format($installment->total_amount_due / 100, 2),
+    '#description' => t('The total amount due'),
+  );
+
   $form['data']['#tree'] = TRUE;
 
   // Add the field related form elements.
@@ -221,6 +227,9 @@ function commerce_installments_edit_form($form, &$form_state, $installment) {
  */
 function commerce_installments_edit_form_validate(&$form, &$form_state) {
   $installment = $form_state['commerce_installments'];
+
+  form_set_value($form['total_amount_due'], round($form_state['values']['total_amount_due'] * 100, 2), $form_state);
+  form_set_value($form['due_date'], mktime(0,0,0, $form_state['values']['due_date']['month'], $form_state['values']['due_date']['day'], $form_state['values']['due_date']['year']), $form_state);
   
   // Notify field widgets to validate their data.
   field_attach_form_validate('commerce_installments', $installment, $form, $form_state);

@@ -47,6 +47,7 @@ function commerce_installments_views_data_alter(&$data) {
   $data['commerce_installments']['created']['field']['handler'] = 'views_handler_field_date';
   $data['commerce_installments']['changed']['field']['handler'] = 'views_handler_field_date';
   $data['commerce_installments']['due_date']['field']['handler'] = 'views_handler_field_date';
+  $data['commerce_installments']['total_amount_due']['field']['handler'] = 'commerce_installments_handler_total_amount_field';
 
 }
 
