@@ -36,8 +36,8 @@ class CommerceInstallmentsUIController extends EntityDefaultUIController {
 
     // Change the add page menu to multiple types of entities
     $items[$this->path . '/add'] = array(
-      'title' => 'Add a commerce installments',
-      'description' => 'Add a new commerce installments',
+      'title' => 'Add a commerce installment',
+      'description' => 'Add a new commerce installment',
       'page callback'  => 'commerce_installments_add_page',
       'access callback'  => 'commerce_installments_access',
       'access arguments' => array('edit'),
