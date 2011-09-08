@@ -165,9 +165,9 @@ function commerce_installments_delete_form_wrapper($installment) {
  */
 function commerce_installments_edit_form($form, &$form_state, $installment) {
   // Add the default field elements.
-  $form['name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Commerce Installment Name'),
+  $form['due_date'] = array(
+    '#type' => 'date',
+    '#title' => t('Installment due date'),
     '#default_value' => isset($installment->name) ? $installment->name : '',
     '#maxlength' => 255,
     '#required' => TRUE,

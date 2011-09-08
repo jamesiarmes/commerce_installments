@@ -504,5 +504,229 @@ class CommerceInstallmentsTypeController extends EntityAPIControllerExportable {
     $installment_type = parent::create($values);
     return $installment_type;
   }
+}
 
+/**
+ * Commerce installments field
+ */
+
+/**
+ * Implements hook_field_info().
+ *
+ * Provides the description of the field.
+ */
+function commerce_installments_field_info() {
+  return array(
+    // We name our field as the associative name of the array.
+    'commerce_installments_payment' => array(
+      'label' => t('Installment payment'),
+      'description' => t('Used to create a payment schedule'),
+      'default_widget' => 'commerce_installments_payment_text',
+      'default_formatter' => 'commerce_installments_payment_text',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_presave().
+ */
+function commerce_installments_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  foreach ($items as $delta => &$item) {
+    // Convert the due date into unixtime
+    $item['duedate'] = mktime(0,0,0, $item['commerce_installments_payment']['due_date']['month'], $item['commerce_installments_payment']['due_date']['day'], $item['commerce_installments_payment']['due_date']['year']);
+    // Convert the amount into an integer
+    $item['amount'] = round($item['commerce_installments_payment']['amount'] * 100, 0);
+  }
+}
+
+/**
+ * Implements hook_field_validate().
+ *
+ * This hook gives us a chance to validate content that's in our
+ * field. We're really only interested in the $items parameter, since
+ * it holds arrays representing content in the field we've defined.
+ * If it doesn't validate, we add our own error notification to the 
+ * $errors parameter.
+ *
+ * @see commerce_installments_field_widget_error()
+ */
+function commerce_installments_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  foreach ($items as $delta => $item) {
+    if (!empty($item['commerce_installments_payment'])) {
+// TODO: Add validation and error handeling //
+      if (FALSE) {
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'commerce_installments_invalid',
+          'message' => t('Add error message here'),
+        );
+      }
+    }
+  }
+}
+
+
+/**
+ * Implements hook_field_is_empty().
+ *
+ * hook_field_is_emtpy() is where Drupal asks us if this field is empty.
+ * Return TRUE if it does not contain data, FALSE if it does. This lets
+ * the form API flag an error when required fields are empty.
+ */
+function commerce_installments_field_is_empty($item, $field) {
+// TODO: Add proper is_empty handleing)
+  return empty($item['commerce_installments_payment']);
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ * We need to tell Drupal that we have two different types of formatters
+ * for this field. One will change the text color, and the other will
+ * change the background color.
+ *
+ * @see commerce_installments_field_formatter_view()
+ */
+function commerce_installments_field_formatter_info() {
+  return array(
+    // This formatter just displays text for now
+    'commerce_installments_payment_text' => array(
+      'label' => t('Simple text-based formatter'),
+      'field types' => array('commerce_installments_payment'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ *
+ * Two formatters are implemented.
+ * - commerce_installments_payment_text just outputs markup indicating the color that
+ *   was entered and uses an inline style to set the text color to that value.
+ *
+ * @see commerce_installments_field_formatter_info()
+ */
+function commerce_installments_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  switch ($display['type']) {
+    // This formatter simply outputs the field as text and with a color.
+    case 'commerce_installments_payment_text':
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+          // We create a render array to produce the desired markup,
+          // "<p style="color: #hexcolor">The color code ... #hexcolor</p>".
+          // See theme_html_tag().
+          '#type' => 'html_tag',
+          '#tag' => 'pre',
+          '#value' => var_export($item['commerce_installments_payment'], true),
+        );
+      }
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_widget_info().
+ *
+ * Three widgets are provided.
+ * - A temporary widget.
+ *
+ * These widget types will eventually show up in hook_field_widget_form,
+ * where we will have to flesh them out.
+ *
+ * @see commerce_installments_field_widget_form()
+ */
+function commerce_installments_field_widget_info() {
+  return array(
+    'commerce_installments_payment' => array(
+      'label' => t('Installment Payment'),
+      'field types' => array('commerce_installments_payment'),
+    ),
+  );
+}
+
+/**
+ * Transforms date to an array expected by field
+ */
+function commerce_installments_date_transform($timestamp){
+  $timestamp = intval($timestamp);
+  $date_array = array(
+    'year' => (int) date("Y", $timestamp),
+    'month' => (int) date("m", $timestamp),
+    'day' => (int) date("d", $timestamp),
+  );
+  dpm($date_array);
+  return $date_array;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ *
+ * hook_widget_form() is where Drupal tells us to create form elements for
+ * our field's widget.
+ *
+ */
+function commerce_installments_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+
+  $value = isset($items[$delta]['commerce_installments_payment']) ? $items[$delta]['commerce_installments_payment'] : '';
+  $widget = $element;
+  $widget['#delta'] = $delta;
+
+  switch ($instance['widget']['type']) {
+    case 'commerce_installments_payment':
+      $widget['due_date'] = array(
+        '#type' => 'date',
+        '#title' => t('Payment due date'),
+        '#default_value' => isset($items[$delta]['duedate']) ? commerce_installments_date_transform($items[$delta]['duedate']) : commerce_installments_date_transform(strtotime('NOW')),
+        '#description' => t('The due date for the installment payment.'),
+      );
+      $widget['amount'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Amount Due'),
+        '#size' => 6,
+        '#default_value' => '10.00',
+        '#description' => t('The amount due'),
+      );
+    break;
+  }
+
+  $element['commerce_installments_payment'] = $widget;
+  return $element;
+}
+
+/**
+ * Implements hook_field_widget_error().
+ *
+ * hook_field_widget_error() lets us figure out what to do with errors
+ * we might have generated in hook_field_validate(). Generally, we'll just
+ * call form_error().
+ *
+ */
+function commerce_installments_field_widget_error($element, $error, $form, &$form_state) {
+  switch ($error['error']) {
+
+  }
+}
+
+/**
+ * Implements hook_menu().
+ *
+ * Provides a simple user interface that tells the developer where to go.
+ */
+function commerce_installments_menu() {
+  $items['admin/commerce/config/installments'] = array(
+    'title' => 'Configure commerce installments',
+    'page callback' => '_commerce_installments_page',
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+
+/**
+ * A simple page to explain to the developer what to do.
+ */
+function _commerce_installments_page() {
+  return t("Test page.");
 }
