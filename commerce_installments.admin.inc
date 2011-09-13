@@ -103,6 +103,15 @@ class CommerceInstallmentsUIController extends EntityDefaultUIController {
       'access arguments' => array('view', 1),
       'type' => MENU_CALLBACK,
     );
+    $items['user/%user/commerce_installments'] = array(
+      'title' => 'Installments',
+      'page callback' => 'commerce_installments_user_page_view',
+      'page arguments' => array(1),
+      'access callback' => 'commerce_installments_user_page_access',
+      'access arguments' => array('view', 1),
+      'type' => MENU_LOCAL_TASK,
+    );
+
     return $items;
   }
   
@@ -172,12 +181,27 @@ function commerce_installments_edit_form($form, &$form_state, $installment) {
     '#description' => t('The due date for the installment payment.'),
   );
 
+  $form['due_date'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Description'),
+    '#default_value' => $installment->description,
+    '#description' => t('A description for the installment.'),
+  );  
+
   $form['total_amount_due'] = array(
     '#type' => 'textfield',
     '#title' => t('Amount Due'),
     '#size' => 6,
-    '#default_value' => number_format($installment->total_amount_due / 100, 2),
+    '#default_value' => (!empty($installment->total_amount_due)) ?number_format($installment->total_amount_due / 100, 2) : 0.00,
     '#description' => t('The total amount due'),
+  );
+
+  $form['paid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Amount paid'),
+    '#size' => 6,
+    '#default_value' => (!empty($installment->paid)) ?number_format($installment->paid / 100, 2) : 0.00,
+    '#description' => t('The total amount paid.'),
   );
 
   $form['data']['#tree'] = TRUE;
@@ -228,7 +252,18 @@ function commerce_installments_edit_form($form, &$form_state, $installment) {
 function commerce_installments_edit_form_validate(&$form, &$form_state) {
   $installment = $form_state['commerce_installments'];
 
-  form_set_value($form['total_amount_due'], round($form_state['values']['total_amount_due'] * 100, 2), $form_state);
+  // Check to make sure the total amount due, and the amount paid positive decimals.
+  foreach (array('total_amount_due', 'paid') as $value) {
+    if (!is_numeric($form_state['values'][$value]) || $value < 0) {
+      form_set_error($form[$value], t("You must enter a positive amount."));
+    }
+  }
+
+  // You have to use form_set_value() during validation to set the values to integers.
+  // Otherwise strange things can happen if things dont work as planned(valid validaiton, etc).
+  form_set_value($form['total_amount_due'], round($form_state['values']['total_amount_due'] * 100, 0), $form_state);
+  form_set_value($form['paid'], round($form_state['values']['paid'] * 100, 0), $form_state);
+
   form_set_value($form['due_date'], mktime(0,0,0, $form_state['values']['due_date']['month'], $form_state['values']['due_date']['day'], $form_state['values']['due_date']['year']), $form_state);
   
   // Notify field widgets to validate their data.

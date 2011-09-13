@@ -42,12 +42,11 @@ function commerce_installments_views_data_alter(&$data) {
   );
   $data['commerce_installments']['initial_order_ref']['field']['handler'] = 'commerce_installments_handler_initial_order_link_field';
   $data['commerce_installments']['initial_line_item_ref']['field']['handler'] = 'commerce_order_handler_field_order_link';
-  $data['commerce_installments']['paid_order_ref']['field']['handler'] = 'commerce_installments_handler_paid_order_link_field';
-  $data['commerce_installments']['paid_line_item_ref']['field']['handler'] = 'commerce_order_handler_field_order_link';
   $data['commerce_installments']['created']['field']['handler'] = 'views_handler_field_date';
   $data['commerce_installments']['changed']['field']['handler'] = 'views_handler_field_date';
   $data['commerce_installments']['due_date']['field']['handler'] = 'views_handler_field_date';
   $data['commerce_installments']['total_amount_due']['field']['handler'] = 'commerce_installments_handler_total_amount_field';
+  $data['commerce_installments']['paid']['field']['handler'] = 'commerce_installments_handler_total_amount_field';
 
 }
 

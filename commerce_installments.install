@@ -36,6 +36,13 @@ function commerce_installments_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'description' => array(
+        'description' => 'A description of the installment.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'created' => array(
         'description' => 'The Unix timestamp when the commerce installments was created.',
         'type' => 'int',
@@ -76,15 +83,8 @@ function commerce_installments_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'paid_order_ref' => array(
-        'description' => 'The order ID of linked to the payment of this installment.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'paid_line_item_ref' => array(
-        'description' => 'The line item ID of linked to the payment of this installment.',
+      'paid' => array(
+        'description' => 'The total amount paid',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -97,6 +97,14 @@ function commerce_installments_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'status' => array(
+        'description' => 'An installment status indicator. 0 for unpaid, 1 for paid.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+      ),
       'data' => array(
         'type' => 'blob',
         'not null' => FALSE,
@@ -108,6 +116,8 @@ function commerce_installments_schema() {
     'primary key' => array('commerce_installments_id'),
     'indexes' => array(
       'type' => array('type'),
+      'uid' => array('uid'),
+      'status' => array('status'),
     ),
   );
 
@@ -179,7 +189,7 @@ function commerce_installments_field_schema($field) {
   if ($field['type'] == 'commerce_installments_payment') {
     return array(
       'columns' => array (
-        'duedate' => array (
+        'due_date' => array (
           'description' => 'The Unix timestamp of the payment due date.',
           'type' => 'int',
           'not null' => TRUE,
