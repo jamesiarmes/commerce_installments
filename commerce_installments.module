@@ -7,17 +7,6 @@
  */
 
 /**
- * Implements hook_views_api().
- */
-function commerce_installments_views_api() {
-  return array(
-    'api' => 3,
-    'path' => drupal_get_path('module', 'commerce_installments') . '/views',
-  );
-}
-
-
-/**
  * Commerce installments field
  */
 
@@ -227,25 +216,20 @@ function commerce_installments_field_widget_error($element, $error, $form, &$for
   }
 }
 
-/**
- * Implements hook_menu().
- *
- * Provides a simple user interface that tells the developer where to go.
- */
-function commerce_installments_menu() {
-  $items['admin/commerce/config/installments'] = array(
-    'title' => 'Configure commerce installments',
-    'page callback' => '_commerce_installments_page',
-    'access callback' => TRUE,
-  );
-  return $items;
-}
 
 /**
- * A simple page to explain to the developer what to do.
+ * Implements hook_commerce_line_item_type_info().
  */
-function _commerce_installments_page() {
-  return t("Test page.");
+function commerce_installments_commerce_line_item_type_info() {
+
+  $line_item_types['installment'] = array(
+    'name' => t('Installment'),
+    'description' => t('Special installment type of line item'),
+    'product' => TRUE,
+    'add_form_submit_value' => t('Add product'),
+    'base' => 'commerce_product_line_item',
+  );
+  return $line_item_types;
 }
 
 /**
@@ -410,113 +394,3 @@ function commerce_installments_create_product($product_type, $values, $extras) {
   return $new_product->product_id;
 }
 
-/**
- * User integration access callback.
- */
-function commerce_installments_rules_access($type, $name) {
-  if ($type == 'event' || $type == 'condition') {
-    return entity_metadata_entity_access('view', 'user');
-  }
-  // Else return admin access.
-  return user_access('administer commerce installments');
-}
-
-/**
- * User page
- */
-function commerce_installments_user_page_view($user) {
-  $conditions = array('uid' => 1);
-
-$installments = commerce_installments_load_multiple(FALSE,array('uid' => $user->uid, 'status' => 0));
-
-  return drupal_get_form('commerce_installments_user_payment_form', $user);
-}
-
-function commerce_installments_user_payment_form($form, &$form_state, $user) {
-  $installments = commerce_installments_load_multiple(FALSE,array('uid' => $user->uid, 'status' => 0));
-
-  $form_state['storage']['installments'] = $installments;
-
-  $form['installments']['#tree'] = TRUE;
-
-  foreach($installments as $installment) {
-    $form['installments'][$installment->commerce_installments_id]['pay'] = array(
-      '#type' => 'checkbox',
-      '#default_value' => FALSE,
-    );
-    $form['installments'][$installment->commerce_installments_id]['fee'] = array(
-      '#markup' => check_plain($installment->description),
-    );
-    $form['installments'][$installment->commerce_installments_id]['total'] = array(
-      '#markup' => '$'.number_format($installment->total_amount_due / 100, 2),
-    );
-    $form['installments'][$installment->commerce_installments_id]['paid'] = array(
-      '#markup' => '$'.number_format($installment->paid / 100, 2),
-    );
-    $form['installments'][$installment->commerce_installments_id]['due'] = array(
-      '#markup' => '$'.number_format(($installment->total_amount_due - $installment->paid) / 100, 2),
-    );
-    $form['installments'][$installment->commerce_installments_id]['date'] = array(
-      '#markup' => date('d-m-y', $installment->due_date),
-    );
-    $form['installments'][$installment->commerce_installments_id]['amount'] = array(
-      '#type' => 'textfield',
-      '#default_value' => number_format(($installment->total_amount_due - $installment->paid) / 100, 2),
-      '#size' => 8,
-    );
-  }
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => 'Pay',
-  );
-
-  return $form;
-}
-
-function theme_commerce_installments_user_payment_form($variables) {
-  $form = $variables['form'];
-
-  $header = array(
-    'action' => '',
-    'fee' => t('Fee'),
-    'total' => t('Total'),
-    'paid' =>  t('Paid'),
-    'due' => t('Due'),
-    'date' => t('Due Date'),
-    'amount' => t('Pay Amount')
-  );
-  $rows = array();
-
-  foreach($form['installments'] as $key => $value) {
-    if (substr($key, 0, 1) != '#') {
-      $rows[$key] = array();
-      $rows[$key]['action'] = drupal_render($form['installments'][$key]['pay']);
-      $rows[$key]['fee'] = drupal_render($form['installments'][$key]['fee']);
-      $rows[$key]['total'] = drupal_render($form['installments'][$key]['total']);
-      $rows[$key]['paid'] = drupal_render($form['installments'][$key]['paid']);
-      $rows[$key]['due'] = drupal_render($form['installments'][$key]['due']);
-      $rows[$key]['date'] = drupal_render($form['installments'][$key]['date']);
-      $rows[$key]['amount'] = drupal_render($form['installments'][$key]['amount']);
-    }
-  }
-
-  $content = theme('table', array('header' => $header, 'rows' => $rows));
-  $content .= drupal_render($form['installments']);
-  $content .= drupal_render($form['submit']) . drupal_render_children($form);//$content;
-//  $content .= drupal_render($form);
-//drupal_set_message('<pre>'.var_export($form, true).'</pre>');
-  return $content;
-}
-
-function commerce_installments_user_payment_form_validate($form, &$form_state) {
-
-}
-
-function commerce_installments_user_payment_form_submit($form, &$form_state) {
-
-}
-
-function commerce_installments_user_page_access($user) {
-  return TRUE;
-}

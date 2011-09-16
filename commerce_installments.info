@@ -1,6 +1,7 @@
 name = Commerce Installments
 description = Allows a product to create other products based on a payment schedule
 core = 7.x
+package = Commerce (contrib)
 
 dependencies[] = commerce
 dependencies[] = rules

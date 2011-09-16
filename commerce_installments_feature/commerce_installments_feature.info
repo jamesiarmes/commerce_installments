@@ -14,6 +14,6 @@ features[field][] = "commerce_product-installment_payment-field_original_order"
 features[rules_config][] = "commerce_installment_process_checkout"
 features[views_view][] = "commerce_installment_payment"
 name = "Commerce Installments Feature"
-package = "Features"
+package = Commerce (contrib)
 project = "commerce_installments_feature"
 version = "7.x-1.0"
