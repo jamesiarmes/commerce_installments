@@ -6,6 +6,8 @@ dependencies[] = entity
 dependencies[] = views
 dependencies[] = commerce
 dependencies[] = rules
+dependencies[] = entityreference
+dependencies[] = commerce_product
 
 files[] = commerce_installments.admin.inc
 files[] = commerce_installments_type.admin.inc

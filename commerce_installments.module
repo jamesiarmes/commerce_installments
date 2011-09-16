@@ -2,8 +2,9 @@
 
 /**
  * @file
- * Module for Commerce Installments. Written by Commerce Guys, sponsored by All players.
- */  
+ * Module for Commerce Installments. Written by Commerce Guys, sponsored by All
+ * players.
+ */
 
 /**
  * Implement hook_entity_info().
@@ -45,7 +46,7 @@ function commerce_installments_entity_info() {
       'menu wildcard' => '%commerce_installments',
     ),
   );
-  // The entity that holds information about the entity types	  
+  // The entity that holds information about the entity types
   $return['commerce_installments_type'] = array(
     'label' => t('Commerce Installment Type'),
     'entity class' => 'CommerceInstallmentsType',
@@ -95,7 +96,7 @@ function commerce_installments_entity_info_alter(&$entity_info) {
     );
   }
 }
-  
+
 
 /**
  * Implements hook_permission().
@@ -111,10 +112,10 @@ function commerce_installments_permission() {
     'administer commerce installments' => array(
       'title' => t('Administer commerce installments'),
       'description' => t('Edit and delete all commerce installments'),
-    ),  
+    ),
   );
-  
-  //Generate permissions per commerce installments 
+
+  //Generate permissions per commerce installments
   foreach (commerce_installments_get_types() as $type) {
     $type_name = check_plain($type->type);
     $permissions += array(
@@ -126,7 +127,7 @@ function commerce_installments_permission() {
       ),
     );
   }
-  return $permissions;  
+  return $permissions;
 }
 
 
@@ -196,7 +197,7 @@ function commerce_installments_type_load($type) {
 
 
 /**
- * Fetch a commerce installments object. Make sure that the wildcard you choose 
+ * Fetch a commerce installments object. Make sure that the wildcard you choose
  * in the commerce installments entity definition fits the function name here.
  *
  * @param $commerce_installments_id
@@ -236,7 +237,7 @@ function commerce_installments_load_multiple($installment_ids = array(), $condit
 
 /**
  * Deletes a commerce installments.
- * 
+ *
  * @param $installment
  *   The commerce installments object.
  */
@@ -258,7 +259,7 @@ function commerce_installments_delete_multiple(array $installment_ids) {
 
 /**
  * Create a commerce installments object.
- * 
+ *
  * @param $installment_ids
  *   An array of values to be saved.
  */
@@ -332,7 +333,7 @@ function commerce_installments_page_title(CommerceInstallments $installment){
  */
 function commerce_installments_page_view(CommerceInstallments $installment, $view_mode = 'full') {
   // @todo: figure out how installments themselves should look.
-  $controller = entity_get_controller('commerce_installments');  
+  $controller = entity_get_controller('commerce_installments');
   $content = $controller->view(array($installment->commerce_installments_id => $installment));
   return $content;
 }
@@ -368,9 +369,9 @@ function commerce_installments_theme() {
     ),
     'commerce_installments_user_payment_form' => array(
       'render element' => 'form',
-    ), 
+    ),
   );
-}  
+}
 
 
 /**
@@ -394,7 +395,7 @@ function commerce_installments_menu_local_tasks_alter(&$data, $router_item, $roo
  * The class used for commerce installments entities
  */
 class CommerceInstallments extends Entity {
-  
+
   public function __construct($values = array()) {
     parent::__construct($values, 'commerce_installments');
   }
@@ -413,14 +414,14 @@ class CommerceInstallments extends Entity {
  * The class used for commerce installments type entities
  */
 class CommerceInstallmentsType extends Entity {
-  
+
   public $type;
   public $label;
-  
+
   public function __construct($values = array()) {
     parent::__construct($values, 'commerce_installments_type');
   }
-  
+
 }
 
 
@@ -437,7 +438,7 @@ class CommerceInstallmentsController extends EntityAPIController {
    * Create a commerce installments - we first set up the values that are specific
    * to our commerce installments schema but then also go through the EntityAPIController
    * function.
-   * 
+   *
    * @param $type
    *   The machine-readable type of the commerce installments.
    *
@@ -446,7 +447,7 @@ class CommerceInstallmentsController extends EntityAPIController {
    */
   public function create(array $values = array()) {
     // Add values that are specific to our Commerce Installment
-    $values += array( 
+    $values += array(
       'commerce_installments_id' => '',
       'is_new' => TRUE,
       //@todo: Do we need titles for installments? If so, what should it be.
@@ -455,11 +456,11 @@ class CommerceInstallmentsController extends EntityAPIController {
       'changed' => '',
       'data' => '',
     );
-    
+
     $installment = parent::create($values);
     return $installment;
   }
-  
+
   /**
    * Overriding the buildContent function to add entity specific fields
    */
@@ -473,7 +474,7 @@ class CommerceInstallmentsController extends EntityAPIController {
 
     return $content;
   }
-  
+
 }
 
 /**
@@ -483,12 +484,12 @@ class CommerceInstallmentsTypeController extends EntityAPIControllerExportable {
   public function __construct($entityType) {
     parent::__construct($entityType);
   }
-  
+
    /**
    * Create a commerce installments type - we first set up the values that are specific
    * to our commerce installments type schema but then also go through the EntityAPIController
    * function.
-   * 
+   *
    * @param $type
    *   The machine-readable type of the commerce installments.
    *
@@ -497,7 +498,7 @@ class CommerceInstallmentsTypeController extends EntityAPIControllerExportable {
    */
   public function create(array $values = array()) {
     // Add values that are specific to our Commerce Installment
-    $values += array( 
+    $values += array(
       'id' => '',
       'is_new' => TRUE,
       'data' => '',
@@ -551,7 +552,7 @@ function commerce_installments_field_presave($entity_type, $entity, $field, $ins
  * This hook gives us a chance to validate content that's in our
  * field. We're really only interested in the $items parameter, since
  * it holds arrays representing content in the field we've defined.
- * If it doesn't validate, we add our own error notification to the 
+ * If it doesn't validate, we add our own error notification to the
  * $errors parameter.
  *
  * @see commerce_installments_field_widget_error()
@@ -622,12 +623,9 @@ function commerce_installments_field_formatter_view($entity_type, $entity, $fiel
     case 'commerce_installments_payment_text':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
-          // We create a render array to produce the desired markup,
-          // "<p style="color: #hexcolor">The color code ... #hexcolor</p>".
-          // See theme_html_tag().
           '#type' => 'html_tag',
-          '#tag' => 'pre',
-          '#value' => var_export($item['commerce_installments_payment'], true),
+          '#tag' => 'strong',
+          '#value' => format_date($item['due_date'], 'short') . ' ' . $item['amount'],
         );
       }
       break;
@@ -766,7 +764,12 @@ function commerce_installments_rules_action_info() {
 }
 
 /**
- * Action: Unblock a user.
+ * Action: Create installment products from a line item's product.
+ *
+ * @param $line_item
+ *   The populated line item array.
+ * @param $order
+ *   The populated order array.
  */
 function commerce_installments_action_create_installments($line_item, $order) {
   if (empty($line_item->data['commerce_installments']['processed'])) {
@@ -780,29 +783,39 @@ function commerce_installments_action_create_installments($line_item, $order) {
     }
 
     $base_values = array(
-      'type' => 'installment',
+      'type' => 'installment_payment',
       'created' => time(),
       'changed' => time(),
-      'initial_order_ref' =>  $order->order_number,
-      'initial_line_item_ref' =>  $line_item->line_item_id,
-      'uid' =>  $order->uid,
+      'original_order' =>  $order->order_number,
+      'original_line_item' =>  $line_item->line_item_id,
     );
-
+    $base_extras = array(
+      'uid' =>  $order->uid,
+      'status' => 1,
+    );
     $product = array_pop(entity_load('commerce_product', array($line_item->commerce_product['und'][0]['product_id'])));
-
+    $account = user_load($order->uid);
     // TODO: Add a description field to the rule.
 
     // Check to see if the product has any installment fields.
     foreach ($fields as $field) {
       // If so, create an installment entity for each installment.
       if (!empty($product->$field)) {
+        $installment_number = 0;
         foreach ($product->{$field}['und'] as $installment) {
+          $installment_number++;
           $new_installment = $base_values + array(
-            'total_amount_due' =>  $installment['amount'],
+            'price' =>  $installment['amount'],
+            'amount_paid' => 0,
             'due_date' =>  $installment['due_date'],
           );
-          $new_installment = entity_create('commerce_installments', $new_installment);
-          commerce_installments_save($new_installment);
+
+          $new_extras = $base_extras + array(
+            // Sku unique by username + order + lineitem + payment#
+            'sku' => 'Installment_' . $account->name . '_' . $order->order_id . '_' . $line_item->line_item_id . '_installment_' . $installment_number,
+            'title' => t('Installment @installment for @title (user @name)', array('@installment' => $installment_number, '@name' => $account->name, '@title' => $line_item->line_item_label)),
+          );
+          $new_installment_product_id = commerce_installments_create_product('installment_payment', $new_installment, $new_extras);
         }
       }
     }
@@ -810,6 +823,87 @@ function commerce_installments_action_create_installments($line_item, $order) {
     $line_item->data['commerce_installments']['processed'] = TRUE;
     commerce_line_item_save($line_item);
   }
+}
+
+/**
+ * Create a product programmatically.
+ *
+ * This is stolen shamelessly from commerce_bpc. However, I'm not comfortable
+ * with the field saving using form api. Seems quite odd.
+ *
+ * @param $product_type
+ *   (string) The name of the product type for which products should be created.
+ * @param $values
+ *   Keyed array with
+ *   - 'price' => actual amount owed on this installment; decimal text like '1.50'
+ *   - 'amount_paid' => price amount already paid as a decimal text like '1.50';
+ *   - 'original_order' => order id of the original order
+ *   - 'original_line_item' => line item id of original line item
+ * @param $extras
+ *   An array for the values of  'extra fields' defined for the product type
+ *   entity, or patterns for these. Recognized keys are:
+ *   - status
+ *   - uid
+ *   - sku
+ *   - title
+ *   Note that the values do NOT come in the form of complex arrays (as they
+ *   are not translatable, and can only have single values) like the
+ *   previous two parameters.
+ * @return
+ *   The ID of the created product.
+ */
+function commerce_installments_create_product($product_type, $values, $extras) {
+  $form_state = array();
+  $form_state['values'] = $values;
+  $form = array();
+  $form['#parents'] = array();
+
+  // Generate a new product object
+  $new_product = commerce_product_new($product_type);
+
+  $new_product->status = $extras['status'];
+  $new_product->uid = $extras['uid'];
+
+  $new_product->sku = $extras['sku'];
+  $new_product->title = $extras['title'];
+  $new_product->created = $new_product->changed = time();
+
+  // field_original_order[und][0][target_id]
+  $order = array(LANGUAGE_NONE => array(0 => array('target_id' => $values['original_order'])));
+  $form_state['values']['field_original_order'] = $order;
+
+  // field_original_line_item[und][0][target_id]
+  $line_item = array(LANGUAGE_NONE => array(0 => array('target_id' => $values['original_line_item'])));
+  $form_state['values']['field_original_line_item'] = $line_item;
+
+  //commerce_price[und][0][amount]
+  $price = array(LANGUAGE_NONE => array(0 => array(
+    'amount' => $values['price'],
+    'currency_code' => commerce_default_currency(),
+  )));
+  $form_state['values']['commerce_price'] = $price;
+
+  // commerce_price[und][0][currency_code]
+//  $currency_code = array(LANGUAGE_NONE => array(0 => array('currency_code' => commerce_default_currency())));
+//  $form_state['values']
+
+  //field_amount_paid[und][0][amount]
+  $amount_paid = array(LANGUAGE_NONE => array(0 => array(
+    'amount' => $values['amount_paid'],
+    'currency_code' => commerce_default_currency(),
+  )));
+  $form_state['values']['field_amount_paid'] = $amount_paid;
+
+  // field_due_date[und][0][value][date]
+  $due_date = array(LANGUAGE_NONE => array(0 => array('date' => $values['due_date'])));
+  $form_state['values']['field_due_date'] = $due_date;
+
+
+  // Notify field widgets to save their field data
+  field_attach_submit('commerce_product', $new_product, $form, $form_state);
+
+  commerce_product_save($new_product);
+  return $new_product->product_id;
 }
 
 /**
@@ -828,7 +922,7 @@ function commerce_installments_rules_access($type, $name) {
  */
 function commerce_installments_user_page_view($user) {
   $conditions = array('uid' => 1);
-  
+
 $installments = commerce_installments_load_multiple(FALSE,array('uid' => $user->uid, 'status' => 0));
 
   return drupal_get_form('commerce_installments_user_payment_form', $user);
@@ -867,7 +961,7 @@ function commerce_installments_user_payment_form($form, &$form_state, $user) {
       '#size' => 8,
     );
   }
-  
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Pay',
@@ -912,11 +1006,11 @@ function theme_commerce_installments_user_payment_form($variables) {
 }
 
 function commerce_installments_user_payment_form_validate($form, &$form_state) {
-  
+
 }
 
 function commerce_installments_user_payment_form_submit($form, &$form_state) {
-  
+
 }
 
 function commerce_installments_user_page_access($user) {
