@@ -2,9 +2,8 @@ name = Commerce Installments
 description = Allows a product to create other products based on a payment schedule
 core = 7.x
 
-dependencies[] = views
 dependencies[] = commerce
 dependencies[] = rules
 dependencies[] = entityreference
 dependencies[] = commerce_product
-
+dependencies[] = commerce_installments_feature
