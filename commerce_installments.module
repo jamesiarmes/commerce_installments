@@ -7,6 +7,17 @@
  */
 
 /**
+ * Implements hook_form_FORMID_alter() to change the Add to Cart button text.
+ */
+function commerce_installments_form_commerce_cart_add_to_cart_form_alter(&$form, &$form_state) {
+  dsm('In commerce_installments_form_commerce_cart_add_to_cart_form_alter()');
+  $line_item_type = $form_state['line_item']->type;
+  if ($line_item_type == 'installment') {
+    $form['submit']['#value'] = t('Pay now');
+  }
+}
+
+/**
  * Commerce installments field
  */
 
