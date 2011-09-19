@@ -229,6 +229,13 @@ function commerce_installments_field_widget_error($element, $error, $form, &$for
 
 
 /**
+ * Implements hook_enable() to provide a new line item type.
+ */
+function commerce_installments_enable() {
+  commerce_product_line_item_configuration('installment');
+}
+
+/**
  * Implements hook_commerce_line_item_type_info().
  */
 function commerce_installments_commerce_line_item_type_info() {
