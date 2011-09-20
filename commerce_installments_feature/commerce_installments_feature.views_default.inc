@@ -36,16 +36,23 @@ function commerce_installments_feature_views_default_views() {
   $handler->display->display_options['pager']['options']['expose']['items_per_page_options_all'] = 0;
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
+    'product_id_1' => 'product_id_1',
     'title' => 'title',
     'product_id' => 'product_id',
     'commerce_price' => 'commerce_price',
     'field_amount_paid' => 'field_amount_paid',
+    'add_to_cart_form' => 'add_to_cart_form',
     'sku' => 'sku',
     'name' => 'name',
-    'field_original_order' => 'field_original_order',
   );
   $handler->display->display_options['style_options']['default'] = 'commerce_price';
   $handler->display->display_options['style_options']['info'] = array(
+    'product_id_1' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+    ),
     'title' => array(
       'sortable' => 1,
       'default_sort_order' => 'asc',
@@ -70,6 +77,10 @@ function commerce_installments_feature_views_default_views() {
       'align' => '',
       'separator' => '',
     ),
+    'add_to_cart_form' => array(
+      'align' => '',
+      'separator' => '',
+    ),
     'sku' => array(
       'sortable' => 1,
       'default_sort_order' => 'asc',
@@ -77,12 +88,6 @@ function commerce_installments_feature_views_default_views() {
       'separator' => '',
     ),
     'name' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-    ),
-    'field_original_order' => array(
       'sortable' => 1,
       'default_sort_order' => 'asc',
       'align' => '',
@@ -103,6 +108,29 @@ function commerce_installments_feature_views_default_views() {
   $handler->display->display_options['relationships']['field_original_order_target_id']['table'] = 'field_data_field_original_order';
   $handler->display->display_options['relationships']['field_original_order_target_id']['field'] = 'field_original_order_target_id';
   $handler->display->display_options['relationships']['field_original_order_target_id']['required'] = 1;
+  /* Field: Commerce Product: Product ID */
+  $handler->display->display_options['fields']['product_id_1']['id'] = 'product_id_1';
+  $handler->display->display_options['fields']['product_id_1']['table'] = 'commerce_product';
+  $handler->display->display_options['fields']['product_id_1']['field'] = 'product_id';
+  $handler->display->display_options['fields']['product_id_1']['label'] = 'Payment ID';
+  $handler->display->display_options['fields']['product_id_1']['alter']['alter_text'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['alter']['make_link'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['alter']['absolute'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['alter']['external'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['alter']['replace_spaces'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['alter']['trim_whitespace'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['alter']['nl2br'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['alter']['word_boundary'] = 1;
+  $handler->display->display_options['fields']['product_id_1']['alter']['ellipsis'] = 1;
+  $handler->display->display_options['fields']['product_id_1']['alter']['strip_tags'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['alter']['trim'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['alter']['html'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['product_id_1']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['product_id_1']['hide_empty'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['empty_zero'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['hide_alter_empty'] = 0;
+  $handler->display->display_options['fields']['product_id_1']['link_to_product'] = 1;
   /* Field: Commerce Product: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'commerce_product';
@@ -228,8 +256,9 @@ function commerce_installments_feature_views_default_views() {
   $handler->display->display_options['fields']['add_to_cart_form']['hide_alter_empty'] = 0;
   $handler->display->display_options['fields']['add_to_cart_form']['show_quantity'] = 0;
   $handler->display->display_options['fields']['add_to_cart_form']['default_quantity'] = '1';
-  $handler->display->display_options['fields']['add_to_cart_form']['combine'] = 1;
+  $handler->display->display_options['fields']['add_to_cart_form']['combine'] = 0;
   $handler->display->display_options['fields']['add_to_cart_form']['display_path'] = 0;
+  $handler->display->display_options['fields']['add_to_cart_form']['line_item_type'] = 'installment';
   /* Field: Commerce Product: SKU */
   $handler->display->display_options['fields']['sku']['id'] = 'sku';
   $handler->display->display_options['fields']['sku']['table'] = 'commerce_product';
