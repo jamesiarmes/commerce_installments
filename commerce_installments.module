@@ -399,17 +399,9 @@ function commerce_installments_create_product($product_type, $values, $extras) {
   )));
   $form_state['values']['commerce_price'] = $price;
 
-  //field_amount_paid[und][0][amount]
-  $amount_paid = array(LANGUAGE_NONE => array(0 => array(
-    'amount' => $values['amount_paid'],
-    'currency_code' => commerce_default_currency(),
-  )));
-  $form_state['values']['field_amount_paid'] = $amount_paid;
-
   // field_due_date[und][0][value][date]
   $due_date = array(LANGUAGE_NONE => array(0 => array('date' => $values['due_date'])));
   $form_state['values']['field_due_date'] = $due_date;
-
 
   // Notify field widgets to save their field data
   field_attach_submit('commerce_product', $new_product, $form, $form_state);
