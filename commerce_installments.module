@@ -275,10 +275,6 @@ function commerce_installments_rules_action_info() {
         'type' => 'commerce_order',
         'label' => t('Commerce Order'),
       ),
-      'original_product' => array(
-        'type' => 'commerce_product',
-        'label' => t('Original Product'),
-      ),
     ),
   );
   $actions['commerce_installments_action_add_to_cart'] = array(
@@ -318,7 +314,7 @@ function commerce_installments_line_item_type_options() {
  * @param $order
  *   The populated order array.
  */
-function commerce_installments_action_create_installments($line_item, $order, $original_product) {
+function commerce_installments_action_create_installments($line_item, $order) {
   if (empty($line_item->data['commerce_installments']['processed'])) {
 
     // Iterate over all of the fields to gather a list of installment field names.
@@ -329,21 +325,21 @@ function commerce_installments_action_create_installments($line_item, $order, $o
       }
     }
 
+    $product = array_pop(entity_load('commerce_product', array($line_item->commerce_product['und'][0]['product_id'])));
+    $account = user_load($order->uid);
+
     $base_values = array(
       'type' => 'installment_payment',
       'created' => time(),
       'changed' => time(),
       'original_order' =>  $order->order_number,
       'original_line_item' =>  $line_item->line_item_id,
-      'original_product' => $original_product->product_id,
+      'original_product' => $product->product_id,
     );
     $base_extras = array(
       'uid' =>  $order->uid,
       'status' => 1,
     );
-    $product = array_pop(entity_load('commerce_product', array($line_item->commerce_product['und'][0]['product_id'])));
-    $account = user_load($order->uid);
-    // TODO: Add a description field to the rule.
 
     // Check to see if the product has any installment fields.
     foreach ($fields as $field) {
@@ -363,6 +359,8 @@ function commerce_installments_action_create_installments($line_item, $order, $o
             'sku' => 'Installment_' . $account->name . '_' . $order->order_id . '_' . $line_item->line_item_id . '_installment_' . $installment_number,
             'title' => t('Installment @installment for @title (user @name)', array('@installment' => $installment_number, '@name' => $account->name, '@title' => $line_item->line_item_label)),
           );
+          dsm($new_installment, '$new_installment at product creation');
+          dsm($new_extras, '$new_extras at product creation');
           $new_installment_product_id = commerce_installments_create_product('installment_payment', $new_installment, $new_extras);
         }
       }
@@ -420,6 +418,8 @@ function commerce_installments_action_add_to_cart($product, $line_item_type) {
  *   - 'amount_paid' => price amount already paid as a decimal text like '1.50';
  *   - 'original_order' => order id of the original order
  *   - 'original_line_item' => line item id of original line item
+ *   - 'original_product => product id of the original product from which the
+ *     new product is being created.
  * @param $extras
  *   An array for the values of  'extra fields' defined for the product type
  *   entity, or patterns for these. Recognized keys are:
@@ -455,6 +455,9 @@ function commerce_installments_create_product($product_type, $values, $extras) {
   // field_original_line_item[und][0][target_id]
   $line_item = array(LANGUAGE_NONE => array(0 => array('target_id' => $values['original_line_item'])));
   $form_state['values']['field_original_line_item'] = $line_item;
+
+  $product = array(LANGUAGE_NONE => array(0 => array('target_id' => $values['original_product'])));
+  $form_state['values']['field_original_product'] = $product;
 
   //commerce_price[und][0][amount]
   $price = array(LANGUAGE_NONE => array(0 => array(
