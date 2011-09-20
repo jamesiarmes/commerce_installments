@@ -275,9 +275,39 @@ function commerce_installments_rules_action_info() {
         'type' => 'commerce_order',
         'label' => t('Commerce Order'),
       ),
+      'original_product' => array(
+        'type' => 'commerce_product',
+        'label' => t('Original Product'),
+      ),
     ),
   );
+  $actions['commerce_installments_action_add_to_cart'] = array(
+    'label' => t('Add a product to the cart'),
+    'group' => t('Commerce Installments'),
+    'parameter' => array(
+      'product' => array(
+        'type' => 'commerce_product',
+        'label' => t('Product'),
+        ),
+      'line_item_type' => array(
+        'type' => 'text',
+        'label' => t('Line Item Type'),
+        'options' => 'commerce_installments_line_item_type_options'
+      ),
+    ),
+  );
+
   return $actions;
+}
+
+/**
+ * Returns an array of line item names keyed by line item type, suitable for use
+ * with a select element #options.
+ */
+function commerce_installments_line_item_type_options() {
+  $types = commerce_line_item_types();
+  $options = array_intersect_key(commerce_line_item_type_get_name(), drupal_map_assoc($types));
+  return $options;
 }
 
 /**
@@ -288,7 +318,7 @@ function commerce_installments_rules_action_info() {
  * @param $order
  *   The populated order array.
  */
-function commerce_installments_action_create_installments($line_item, $order) {
+function commerce_installments_action_create_installments($line_item, $order, $original_product) {
   if (empty($line_item->data['commerce_installments']['processed'])) {
 
     // Iterate over all of the fields to gather a list of installment field names.
@@ -305,6 +335,7 @@ function commerce_installments_action_create_installments($line_item, $order) {
       'changed' => time(),
       'original_order' =>  $order->order_number,
       'original_line_item' =>  $line_item->line_item_id,
+      'original_product' => $original_product->product_id,
     );
     $base_extras = array(
       'uid' =>  $order->uid,
@@ -339,6 +370,41 @@ function commerce_installments_action_create_installments($line_item, $order) {
     // Mark the line item as processed, to prevent future processing.
     $line_item->data['commerce_installments']['processed'] = TRUE;
     commerce_line_item_save($line_item);
+  }
+}
+
+
+/**
+ * Rules Action: Add a product to the cart.
+ *
+ * @param $product
+ *   The product to add.
+ */
+function commerce_installments_action_add_to_cart($product, $line_item_type) {
+  // Create the new product line item of the same type.
+  $line_item = commerce_product_line_item_new($product, 1, 0, array(), $line_item_type);
+
+  // Process the unit price through Rules so it reflects the user's actual
+  // purchase price.
+  rules_invoke_event('commerce_product_calculate_sell_price', $line_item);
+
+  // Only attempt an Add to Cart if the line item has a valid unit price.
+  $line_item_wrapper = entity_metadata_wrapper('commerce_line_item', $line_item);
+
+  if (!is_null($line_item_wrapper->commerce_unit_price->value())) {
+    // Add the product to the specified shopping cart.
+    $form_state['line_item'] = commerce_cart_product_add(
+      $form_state['values']['uid'],
+      $line_item,
+      isset($line_item->data['context']['add_to_cart_combine']) ? $line_item->data['context']['add_to_cart_combine'] : TRUE
+    );
+
+    // TODO: Accommodate multiple product Add to Cart forms better; i.e. should it
+    // display the product title or the product display node title?
+    drupal_set_message(t('%title added to <a href="!cart-url">your cart</a>.', array('%title' => $product->title, '!cart-url' => url('cart'))));
+  }
+  else {
+    drupal_set_message(t('%title could not be added to your cart.', array('%title' => $product->title)), 'error');
   }
 }
 
