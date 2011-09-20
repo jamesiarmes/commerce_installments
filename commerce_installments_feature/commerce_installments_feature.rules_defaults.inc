@@ -50,7 +50,11 @@ function commerce_installments_feature_default_rules_configuration() {
       "USES VARIABLES" : { "line_item" : { "label" : "Line Item", "type" : "commerce_line_item" } },
       "IF" : [
         { "entity_has_field" : { "entity" : [ "line-item" ], "field" : "commerce_product" } },
-        { "entity_has_field" : { "entity" : [ "line-item" ], "field" : "field_installment" } }
+        { "data_is" : {
+            "data" : [ "line-item:commerce-product:type" ],
+            "value" : "master_installment"
+          }
+        }
       ],
       "DO" : [
         { "commerce_installments_action_create_installments" : {
