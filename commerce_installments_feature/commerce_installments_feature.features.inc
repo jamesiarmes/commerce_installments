@@ -16,6 +16,13 @@ function commerce_installments_feature_commerce_product_default_types() {
       'help' => '',
       'module' => 'commerce_product_ui',
     ),
+    'master_installment' => array(
+      'type' => 'master_installment',
+      'name' => 'Master Installment',
+      'description' => '',
+      'help' => '',
+      'module' => 'commerce_product_ui',
+    ),
   );
   return $items;
 }
