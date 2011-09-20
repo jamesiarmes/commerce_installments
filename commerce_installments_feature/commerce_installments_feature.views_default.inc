@@ -396,7 +396,7 @@ function commerce_installments_feature_views_default_views() {
   $handler->display->display_options['fields']['views_bulk_operations']['id'] = 'views_bulk_operations';
   $handler->display->display_options['fields']['views_bulk_operations']['table'] = 'commerce_product';
   $handler->display->display_options['fields']['views_bulk_operations']['field'] = 'views_bulk_operations';
-  $handler->display->display_options['fields']['views_bulk_operations']['label'] = 'Pay Now';
+  $handler->display->display_options['fields']['views_bulk_operations']['label'] = 'Buy Selected Items Now';
   $handler->display->display_options['fields']['views_bulk_operations']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['views_bulk_operations']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['views_bulk_operations']['alter']['absolute'] = 0;
@@ -409,15 +409,22 @@ function commerce_installments_feature_views_default_views() {
   $handler->display->display_options['fields']['views_bulk_operations']['alter']['strip_tags'] = 0;
   $handler->display->display_options['fields']['views_bulk_operations']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['views_bulk_operations']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['views_bulk_operations']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['views_bulk_operations']['element_label_colon'] = 0;
   $handler->display->display_options['fields']['views_bulk_operations']['element_default_classes'] = 1;
   $handler->display->display_options['fields']['views_bulk_operations']['hide_empty'] = 0;
   $handler->display->display_options['fields']['views_bulk_operations']['empty_zero'] = 0;
   $handler->display->display_options['fields']['views_bulk_operations']['hide_alter_empty'] = 0;
   $handler->display->display_options['fields']['views_bulk_operations']['vbo']['entity_load_capacity'] = '10';
   $handler->display->display_options['fields']['views_bulk_operations']['vbo']['operations'] = array(
-    'rules_add_item_to_cart' => array(
+    'rules_add_installment_payment_to_cart' => array(
       'selected' => 1,
+      'use_queue' => 0,
+      'skip_confirmation' => 1,
+      'override_label' => 0,
+      'label' => '',
+    ),
+    'rules_add_item_to_cart' => array(
+      'selected' => 0,
       'use_queue' => 0,
       'skip_confirmation' => 0,
       'override_label' => 0,
@@ -465,6 +472,7 @@ function commerce_installments_feature_views_default_views() {
       'label' => '',
     ),
   );
+  $handler->display->display_options['fields']['views_bulk_operations']['vbo']['enable_select_all_pages'] = 1;
   $handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_type'] = '1';
   $handler->display->display_options['fields']['views_bulk_operations']['vbo']['display_result'] = 1;
   $handler->display->display_options['fields']['views_bulk_operations']['vbo']['merge_single_action'] = 0;
@@ -565,33 +573,6 @@ function commerce_installments_feature_views_default_views() {
     'calculation' => '0',
   );
   $handler->display->display_options['fields']['commerce_price']['field_api_classes'] = 0;
-  /* Field: Commerce Product: Add to Cart form */
-  $handler->display->display_options['fields']['add_to_cart_form']['id'] = 'add_to_cart_form';
-  $handler->display->display_options['fields']['add_to_cart_form']['table'] = 'commerce_product';
-  $handler->display->display_options['fields']['add_to_cart_form']['field'] = 'add_to_cart_form';
-  $handler->display->display_options['fields']['add_to_cart_form']['label'] = '';
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['element_label_colon'] = FALSE;
-  $handler->display->display_options['fields']['add_to_cart_form']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['add_to_cart_form']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['hide_alter_empty'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['show_quantity'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['default_quantity'] = '1';
-  $handler->display->display_options['fields']['add_to_cart_form']['combine'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['display_path'] = 0;
-  $handler->display->display_options['fields']['add_to_cart_form']['line_item_type'] = 'installment';
   /* Field: Commerce Product: SKU */
   $handler->display->display_options['fields']['sku']['id'] = 'sku';
   $handler->display->display_options['fields']['sku']['table'] = 'commerce_product';

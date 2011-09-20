@@ -26,6 +26,23 @@ function commerce_installments_feature_default_rules_configuration() {
       ]
     }
   }');
+  $items['rules_add_installment_payment_to_cart'] = entity_import('rules_config', '{ "rules_add_installment_payment_to_cart" : {
+      "LABEL" : "Add Installment Payment To Cart",
+      "PLUGIN" : "rule",
+      "REQUIRES" : [ "rules" ],
+      "USES VARIABLES" : { "commerce_product" : { "label" : "Product", "type" : "commerce_product" } },
+      "IF" : [
+        { "data_is" : { "data" : [ "commerce-product:type" ], "value" : "installment_payment" } }
+      ],
+      "DO" : [
+        { "component_rules_add_item_to_cart" : {
+            "commerce_product" : [ "commerce_product" ],
+            "line_item_type" : "installment"
+          }
+        }
+      ]
+    }
+  }');
   $items['rules_add_item_to_cart'] = entity_import('rules_config', '{ "rules_add_item_to_cart" : {
       "LABEL" : "Add Item to Cart",
       "PLUGIN" : "action set",
