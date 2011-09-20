@@ -260,7 +260,7 @@ function commerce_installments_commerce_line_item_type_info() {
  * Rules Integration
  */
 /**
- * Implements hook_rules_action_info() on behalf of the user module.
+ * Implements hook_rules_action_info().
  */
 function commerce_installments_rules_action_info() {
   $actions['commerce_installments_action_create_installments'] = array(
@@ -393,14 +393,12 @@ function commerce_installments_action_add_to_cart($product, $line_item_type) {
 
   if (!is_null($line_item_wrapper->commerce_unit_price->value())) {
     // Add the product to the specified shopping cart.
-    $form_state['line_item'] = commerce_cart_product_add(
-      $form_state['values']['uid'],
+    $new_line_item = commerce_cart_product_add(
+      $GLOBALS['user']->uid,
       $line_item,
-      isset($line_item->data['context']['add_to_cart_combine']) ? $line_item->data['context']['add_to_cart_combine'] : TRUE
+      FALSE
     );
 
-    // TODO: Accommodate multiple product Add to Cart forms better; i.e. should it
-    // display the product title or the product display node title?
     drupal_set_message(t('%title added to <a href="!cart-url">your cart</a>.', array('%title' => $product->title, '!cart-url' => url('cart'))));
   }
   else {
