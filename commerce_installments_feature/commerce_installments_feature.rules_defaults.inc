@@ -76,8 +76,7 @@ function commerce_installments_feature_default_rules_configuration() {
       "DO" : [
         { "commerce_installments_action_create_installments" : {
             "commerce_line_item" : [ "line-item" ],
-            "commerce_order" : [ "line-item:order" ],
-            "original_product" : [ "line-item:commerce-product" ]
+            "commerce_order" : [ "line-item:order" ]
           }
         }
       ]
