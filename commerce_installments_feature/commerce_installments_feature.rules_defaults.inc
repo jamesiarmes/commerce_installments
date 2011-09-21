@@ -12,6 +12,7 @@ function commerce_installments_feature_default_rules_configuration() {
   $items['commerce_installments_process_checkout'] = entity_import('rules_config', '{ "commerce_installments_process_checkout" : {
       "LABEL" : "Commerce Installments Create Installments",
       "PLUGIN" : "reaction rule",
+      "TAGS" : [ "commerce_installments" ],
       "REQUIRES" : [ "rules", "commerce_checkout" ],
       "ON" : [ "commerce_checkout_complete" ],
       "DO" : [
@@ -40,6 +41,7 @@ function commerce_installments_feature_default_rules_configuration() {
   $items['rules_create_installment_payment_product_for_line_item'] = entity_import('rules_config', '{ "rules_create_installment_payment_product_for_line_item" : {
       "LABEL" : "Create Installment Payment Product for Line Item",
       "PLUGIN" : "rule",
+      "TAGS" : [ "commerce_installments" ],
       "REQUIRES" : [ "rules", "commerce_installments" ],
       "USES VARIABLES" : { "line_item" : { "label" : "Line Item", "type" : "commerce_line_item" } },
       "IF" : [
@@ -62,7 +64,7 @@ function commerce_installments_feature_default_rules_configuration() {
   $items['rules_disable_installment_payment_product'] = entity_import('rules_config', '{ "rules_disable_installment_payment_product" : {
       "LABEL" : "Disable Installment Payment Product",
       "PLUGIN" : "rule",
-      "TAGS" : [ "commerce_installment" ],
+      "TAGS" : [ "commerce_installments" ],
       "REQUIRES" : [ "rules" ],
       "USES VARIABLES" : { "line_item" : { "label" : "Line Item", "type" : "commerce_line_item" } },
       "IF" : [
@@ -81,6 +83,7 @@ function commerce_installments_feature_default_rules_configuration() {
   $items['rules_disable_installment_payment_product_when_it_s_been_paid'] = entity_import('rules_config', '{ "rules_disable_installment_payment_product_when_it_s_been_paid" : {
       "LABEL" : "Disable Installment Payment Product When It\'s Been Paid",
       "PLUGIN" : "reaction rule",
+      "TAGS" : [ "commerce_installments" ],
       "REQUIRES" : [ "rules", "commerce_payment" ],
       "ON" : [ "commerce_payment_order_paid_in_full" ],
       "DO" : [
