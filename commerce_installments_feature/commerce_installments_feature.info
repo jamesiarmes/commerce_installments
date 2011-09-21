@@ -18,7 +18,6 @@ features[field][] = "commerce_product-installment_payment-field_original_product
 features[field][] = "commerce_product-master_installment-commerce_price"
 features[field][] = "commerce_product-master_installment-field_installment"
 features[rules_config][] = "commerce_installments_process_checkout"
-features[rules_config][] = "rules_add_installment_payment_to_cart"
 features[rules_config][] = "rules_add_item_to_cart"
 features[rules_config][] = "rules_create_installment_payment_product_for_line_item"
 features[rules_config][] = "rules_disable_installment_payment_product"

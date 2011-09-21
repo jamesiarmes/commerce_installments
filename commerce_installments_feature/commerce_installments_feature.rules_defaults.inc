@@ -26,37 +26,14 @@ function commerce_installments_feature_default_rules_configuration() {
       ]
     }
   }');
-  $items['rules_add_installment_payment_to_cart'] = entity_import('rules_config', '{ "rules_add_installment_payment_to_cart" : {
-      "LABEL" : "Add Installment Payment To Cart",
-      "PLUGIN" : "rule",
-      "REQUIRES" : [ "rules" ],
-      "USES VARIABLES" : { "commerce_product" : { "label" : "Product", "type" : "commerce_product" } },
-      "IF" : [
-        { "data_is" : { "data" : [ "commerce-product:type" ], "value" : "installment_payment" } }
-      ],
-      "DO" : [
-        { "component_rules_add_item_to_cart" : {
-            "commerce_product" : [ "commerce_product" ],
-            "line_item_type" : "installment"
-          }
-        }
-      ]
-    }
-  }');
   $items['rules_add_item_to_cart'] = entity_import('rules_config', '{ "rules_add_item_to_cart" : {
-      "LABEL" : "Add Item to Cart",
+      "LABEL" : "Add item to cart",
       "PLUGIN" : "action set",
+      "TAGS" : [ "commerce_installments" ],
       "REQUIRES" : [ "commerce_installments" ],
-      "USES VARIABLES" : {
-        "commerce_product" : { "label" : "Product", "type" : "commerce_product" },
-        "line_item_type" : { "label" : "Line Item Type", "type" : "text" }
-      },
+      "USES VARIABLES" : { "commerce_product" : { "label" : "Product", "type" : "commerce_product" } },
       "ACTION SET" : [
-        { "commerce_installments_action_add_to_cart" : {
-            "product" : [ "commerce-product" ],
-            "line_item_type" : [ "line_item_type" ]
-          }
-        }
+        { "commerce_installments_action_add_to_cart" : { "product" : [ "commerce-product" ] } }
       ]
     }
   }');
@@ -89,7 +66,7 @@ function commerce_installments_feature_default_rules_configuration() {
       "REQUIRES" : [ "rules" ],
       "USES VARIABLES" : { "line_item" : { "label" : "Line Item", "type" : "commerce_line_item" } },
       "IF" : [
-        { "data_is" : { "data" : [ "line-item:type" ], "value" : "installment" } },
+        { "entity_has_field" : { "entity" : [ "line-item" ], "field" : "commerce_product" } },
         { "data_is" : {
             "data" : [ "line-item:commerce-product:type" ],
             "value" : "installment_payment"

@@ -437,17 +437,10 @@ function commerce_installments_feature_views_default_views() {
   $handler->display->display_options['fields']['views_bulk_operations']['hide_alter_empty'] = 0;
   $handler->display->display_options['fields']['views_bulk_operations']['vbo']['entity_load_capacity'] = '10';
   $handler->display->display_options['fields']['views_bulk_operations']['vbo']['operations'] = array(
-    'rules_add_installment_payment_to_cart' => array(
+    'rules_add_item_to_cart' => array(
       'selected' => 1,
       'use_queue' => 0,
       'skip_confirmation' => 1,
-      'override_label' => 0,
-      'label' => '',
-    ),
-    'rules_add_item_to_cart' => array(
-      'selected' => 0,
-      'use_queue' => 0,
-      'skip_confirmation' => 0,
       'override_label' => 0,
       'label' => '',
     ),
@@ -627,8 +620,8 @@ function commerce_installments_feature_views_default_views() {
   $handler->display->display_options['fields']['status']['id'] = 'status';
   $handler->display->display_options['fields']['status']['table'] = 'commerce_product';
   $handler->display->display_options['fields']['status']['field'] = 'status';
-  $handler->display->display_options['fields']['status']['label'] = '';
-  $handler->display->display_options['fields']['status']['alter']['alter_text'] = 1;
+  $handler->display->display_options['fields']['status']['label'] = 'Paid?';
+  $handler->display->display_options['fields']['status']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['status']['alter']['text'] = 'Paid: [status]';
   $handler->display->display_options['fields']['status']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['status']['alter']['absolute'] = 0;
@@ -641,42 +634,12 @@ function commerce_installments_feature_views_default_views() {
   $handler->display->display_options['fields']['status']['alter']['strip_tags'] = 0;
   $handler->display->display_options['fields']['status']['alter']['trim'] = 0;
   $handler->display->display_options['fields']['status']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['status']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['status']['element_label_colon'] = 0;
   $handler->display->display_options['fields']['status']['element_default_classes'] = 1;
   $handler->display->display_options['fields']['status']['hide_empty'] = 0;
   $handler->display->display_options['fields']['status']['empty_zero'] = 0;
   $handler->display->display_options['fields']['status']['hide_alter_empty'] = 0;
   $handler->display->display_options['fields']['status']['not'] = 1;
-  /* Field: Commerce Product: Due Date */
-  $handler->display->display_options['fields']['field_due_date']['id'] = 'field_due_date';
-  $handler->display->display_options['fields']['field_due_date']['table'] = 'field_data_field_due_date';
-  $handler->display->display_options['fields']['field_due_date']['field'] = 'field_due_date';
-  $handler->display->display_options['fields']['field_due_date']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['field_due_date']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['field_due_date']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['field_due_date']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['field_due_date']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['hide_alter_empty'] = 0;
-  $handler->display->display_options['fields']['field_due_date']['settings'] = array(
-    'format_type' => 'short',
-    'fromto' => 'both',
-    'multiple_number' => '',
-    'multiple_from' => '',
-    'multiple_to' => '',
-    'show_repeat_rule' => 'show',
-  );
-  $handler->display->display_options['fields']['field_due_date']['field_api_classes'] = 0;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Commerce Product: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
