@@ -8,11 +8,16 @@
 
 /**
  * Implements hook_form_FORMID_alter() to change the Add to Cart button text.
+ *
+ * Note that this is not even necesary if VBO is used in the customer-facing
+ * purchasing environment instead of using view rows with Add to cart forms.
  */
 function commerce_installments_form_commerce_cart_add_to_cart_form_alter(&$form, &$form_state) {
   $line_item = $form_state['line_item'];
-  $line_item_type = $line_item->type;
-  if ($line_item_type == 'installment') {
+  // Assumes LANGUAGE_NONE for this project... Would not be appropriate in a
+  // general solution.
+  $product = commerce_product_load($line_item->commerce_product[LANGUAGE_NONE][0]['product_id']);
+  if ($product->type == 'installment_payment') {
     // Change the submit button text to more appropriate "Pay now"
     $form['submit']['#value'] = t('Pay now');
 
@@ -235,28 +240,6 @@ function commerce_installments_field_widget_error($element, $error, $form, &$for
 
 
 /**
- * Implements hook_enable() to provide a new line item type.
- */
-function commerce_installments_enable() {
-  commerce_product_line_item_configuration('installment');
-}
-
-/**
- * Implements hook_commerce_line_item_type_info().
- */
-function commerce_installments_commerce_line_item_type_info() {
-
-  $line_item_types['installment'] = array(
-    'name' => t('Installment'),
-    'description' => t('Special installment type of line item'),
-    'product' => TRUE,
-    'add_form_submit_value' => t('Add product'),
-    'base' => 'commerce_product_line_item',
-  );
-  return $line_item_types;
-}
-
-/**
  * Rules Integration
  */
 /**
@@ -285,25 +268,10 @@ function commerce_installments_rules_action_info() {
         'type' => 'commerce_product',
         'label' => t('Product'),
         ),
-      'line_item_type' => array(
-        'type' => 'text',
-        'label' => t('Line Item Type'),
-        'options' => 'commerce_installments_line_item_type_options'
-      ),
     ),
   );
 
   return $actions;
-}
-
-/**
- * Returns an array of line item names keyed by line item type, suitable for use
- * with a select element #options.
- */
-function commerce_installments_line_item_type_options() {
-  $types = commerce_line_item_types();
-  $options = array_intersect_key(commerce_line_item_type_get_name(), drupal_map_assoc($types));
-  return $options;
 }
 
 /**
@@ -359,8 +327,6 @@ function commerce_installments_action_create_installments($line_item, $order) {
             'sku' => 'Installment_' . $account->name . '_' . $order->order_id . '_' . $line_item->line_item_id . '_installment_' . $installment_number,
             'title' => t('Installment @installment for @title (user @name)', array('@installment' => $installment_number, '@name' => $account->name, '@title' => $line_item->line_item_label)),
           );
-          dsm($new_installment, '$new_installment at product creation');
-          dsm($new_extras, '$new_extras at product creation');
           $new_installment_product_id = commerce_installments_create_product('installment_payment', $new_installment, $new_extras);
         }
       }
@@ -375,12 +341,14 @@ function commerce_installments_action_create_installments($line_item, $order) {
 /**
  * Rules Action: Add a product to the cart.
  *
+ * Currently assumes that the line item type will be the default 'product'.
+ *
  * @param $product
  *   The product to add.
  */
 function commerce_installments_action_add_to_cart($product, $line_item_type) {
   // Create the new product line item of the same type.
-  $line_item = commerce_product_line_item_new($product, 1, 0, array(), $line_item_type);
+  $line_item = commerce_product_line_item_new($product);
 
   // Process the unit price through Rules so it reflects the user's actual
   // purchase price.
