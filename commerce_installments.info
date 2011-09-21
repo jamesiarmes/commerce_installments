@@ -7,4 +7,3 @@ dependencies[] = commerce
 dependencies[] = rules
 dependencies[] = entityreference
 dependencies[] = commerce_product
-dependencies[] = commerce_installments_feature
