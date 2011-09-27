@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Commerce Installments Feature feature.
+ */
+
+include_once('commerce_installments_feature.features.inc');
