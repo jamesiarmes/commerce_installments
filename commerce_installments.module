@@ -52,16 +52,22 @@ function commerce_installments_field_info() {
 /**
  * Implements hook_field_presave().
  */
-function commerce_installments_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  foreach ($items as $delta => &$item) {
+function commerce_installments_field_presave($entity_type, $entity, $field,
+  $instance, $langcode, &$items) {
+  foreach ($items as $delta => $item) {
     if ($item['commerce_installments_payment']['amount'] == 0) {
-      unset($item['commerce_installments_payment']);
+      unset($items[$delta]['commerce_installments_payment']);
     }
     else {
       // Convert the due date into unixtime
-      $item['due_date'] = mktime(0,0,0, $item['commerce_installments_payment']['due_date']['month'], $item['commerce_installments_payment']['due_date']['day'], $item['commerce_installments_payment']['due_date']['year']);
+      $items[$delta]['due_date'] = mktime(0, 0, 0,
+        $item['commerce_installments_payment']['due_date']['month'],
+        $item['commerce_installments_payment']['due_date']['day'],
+        $item['commerce_installments_payment']['due_date']['year']);
+
       // Convert the amount into an integer
-      $item['amount'] = round($item['commerce_installments_payment']['amount'] * 100, 0);
+      $items[$delta]['amount'] =
+        round($item['commerce_installments_payment']['amount'] * 100, 0);
     }
   }
 }
