@@ -45,6 +45,48 @@ function commerce_installments_field_info() {
       'description' => t('Used to create a payment schedule'),
       'default_widget' => 'commerce_installments_payment_text',
       'default_formatter' => 'commerce_installments_payment_text',
+      'property_type' => 'commerce_installments',
+      'property_callbacks' => array('commerce_installments_property_info_callback'),
+    ),
+  );
+}
+
+/**
+ * Callback to alter the property info of installment fields.
+ *
+ * @see commerce_installments_field_info().
+ */
+function commerce_installments_property_info_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $name = $field['field_name'];
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+
+  $property['type'] = ($field['cardinality'] != 1) ? 'list<commerce_installments>' : 'commerce_installments';
+  $property['getter callback'] = 'entity_metadata_field_verbatim_get';
+  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
+  $property['property info'] = commerce_installments_field_data_property_info();
+
+  unset($property['query callback']);
+}
+
+/**
+ * Defines info for the properties of the commerce installments field data
+ * structure.
+ */
+function commerce_installments_field_data_property_info($name = NULL) {
+  return array(
+    'due_date' => array(
+      'label' => t('Payment due date'),
+      'description' => t('The due date for the installment.'),
+      'type' => 'integer',
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
+    ),
+    'amount' => array(
+      'label' => t('Amount due'),
+      'description' => t('The amount of the installment.'),
+      'type' => 'decimal',
+      'getter callback' => 'entity_property_verbatim_get',
+      'setter callback' => 'entity_property_verbatim_set',
     ),
   );
 }
